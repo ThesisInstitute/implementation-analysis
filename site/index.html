@@ -111,10 +111,6 @@ ul.items li .lab.actor{color:var(--flag)}
 
 /* the veil */
 .veiled-zone{position:relative}
-section.prov.locked .lens.locked ul.items li,
-section.prov.locked .lens.locked .metrics,
-section.prov.locked .lens.locked .conds{filter:blur(5px);pointer-events:none;user-select:none}
-section.prov.locked .veil-note{display:flex}
 .gate-foot .confirm-all{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;border-radius:7px;border:1px solid var(--confirm);color:var(--confirm);background:transparent;padding:8px 14px;cursor:pointer}
 .gate-foot .hint{font-size:.74rem;color:var(--dim)}
 .veil-note{display:none;align-items:center;gap:8px;font-size:.78rem;color:var(--flag);margin:6px 0 0}
@@ -143,23 +139,22 @@ footer a{color:var(--muted)}
 
   <section class="gate" id="gate">
     <div class="gate-head">
-      <h2>Step 1 · Countersign the imputed goals</h2>
+      <h2>Countersign the imputed goals</h2>
       <p>These are what the drafters <i>appear</i> to be trying to achieve, phrased as staff would
-      own them. Confirm, edit, or strike each — a provision's barrier and forecast analysis
-      unveils as soon as <i>its</i> goals are decided. Scroll down first if you like: the likely
-      effects are already visible. That part is never behind your signature.</p>
+      own them. Confirm, edit, or strike each. Nothing below is held back — the full analysis is
+      open from the start. In the working product, your decisions here steer the next pass: the
+      goal-conditioned questions (does this provision serve <i>your</i> confirmed goals, and what
+      would you trade?) are generated from them. Here they're recorded to show the flow.</p>
     </div>
     <div class="gate-list" id="goals"></div>
     <div class="gate-foot">
       <span class="tally" id="tally"></span>
-      <span class="hint">Reviewing for real? Go card by card. Just looking?</span>
-      <button class="confirm-all" id="confirmAll">Confirm all goals</button>
     </div>
   </section>
 
   <p class="regardless-note"><b>Told regardless:</b> effects are surfaced whether or not they serve
-  the confirmed goals — including the mechanisms a drafter may not want to hear. That asymmetry is
-  the product.</p>
+  the confirmed goals — including the mechanisms a drafter may not want to hear. Confirming goals
+  changes what the tool asks next, never what it shows you.</p>
 
   <div class="body-grid">
     <nav class="outline" id="outline" aria-label="Bill outline"></nav>
@@ -198,21 +193,6 @@ fetch("analysis.json").then(r=>r.json()).then(data=>{
   const decisions = store.get();
   const allGoals = [];
   data.provisions.forEach((p,pi)=>p.goals.forEach((g,gi)=>allGoals.push({id:`${pi}.${gi}`, prov:p.heading.split(":")[0], text:g})));
-  function provDecided(pi){
-    const p = data.provisions[pi];
-    return p.goals.every((_,gi)=>decisions[`${pi}.${gi}`]&&decisions[`${pi}.${gi}`].state);
-  }
-  function applyVeils(){
-    data.provisions.forEach((p,pi)=>{
-      const sec = document.getElementById(`p${pi}`);
-      if(sec) sec.classList.toggle("locked", !provDecided(pi));
-      const note = sec && sec.querySelector(".prov-progress");
-      if(note){
-        const done = p.goals.filter((_,gi)=>decisions[`${pi}.${gi}`]&&decisions[`${pi}.${gi}`].state).length;
-        note.textContent = provDecided(pi) ? "goals countersigned" : `${done} of ${p.goals.length} goals decided — countersign above to unveil`;
-      }
-    });
-  }
   function renderGoals(){
     goalsEl.innerHTML = "";
     allGoals.forEach(g=>{
@@ -236,15 +216,8 @@ fetch("analysis.json").then(r=>r.json()).then(data=>{
       goalsEl.appendChild(row);
     });
     const decided = allGoals.filter(g=>decisions[g.id]&&decisions[g.id].state).length;
-    const provsOpen = data.provisions.filter((_,pi)=>provDecided(pi)).length;
-    document.getElementById("tally").textContent =
-      `${decided} of ${allGoals.length} goals decided · ${provsOpen} of ${data.provisions.length} provisions unveiled`;
-    applyVeils();
+    document.getElementById("tally").textContent = `${decided} of ${allGoals.length} goals decided`;
   }
-  document.getElementById("confirmAll").onclick = ()=>{
-    allGoals.forEach(g=>{const d=decisions[g.id]||{}; if(!d.state) decisions[g.id]={...d,state:"confirm",editing:false};});
-    store.set(decisions); renderGoals();
-  };
 
   // ---- provisions ----
   const provEl = document.getElementById("provisions");
@@ -272,14 +245,12 @@ fetch("analysis.json").then(r=>r.json()).then(data=>{
         <div class="lens-head"><h4>Likely effects</h4><span class="badge regardless">told regardless</span></div>
         <ul class="items">${fx}</ul>
       </div>
-      <div class="lens locked">
-        <div class="lens-head"><h4>Implementation barriers</h4><span class="badge veiledtag">unlocks after countersign</span></div>
-        <p class="veil-note prov-progress"></p>
+      <div class="lens">
+        <div class="lens-head"><h4>Implementation barriers</h4></div>
         <ul class="items">${br}</ul>
       </div>
-      <div class="lens locked">
-        <div class="lens-head"><h4>Forecastable outcomes</h4><span class="badge veiledtag">unlocks after countersign</span></div>
-        <p class="veil-note">Countersign this provision's goals to unveil.</p>
+      <div class="lens">
+        <div class="lens-head"><h4>Forecastable outcomes</h4><span class="badge confirmable">conditional-cell candidates</span></div>
         <div class="metrics">${mt}</div>
         ${cd?`<div class="conds">${cd}</div>`:""}
       </div>`;
