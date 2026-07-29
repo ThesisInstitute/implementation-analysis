@@ -11,6 +11,18 @@ systematically tells a drafter *this carve-out will add administrative
 burden to the actors you need, and take-up will die* — that critique lives
 almost entirely with lobbyists, who only make it for their own clients.
 
+**The Thesis tie is what makes the critique accountable.** Every analysis
+here terminates in the two artifacts Thesis consumes: an outcome metric on
+an officially published, first-print-resolvable series, and a conditional
+forecast (the metric's path under enactment versus not). Registered as
+Thesis cells, implementation claims stop being unfalsifiable commentary
+and become pre-registered, witnessed, scored predictions — the analyst's
+judgment acquires a public track record. In the other direction, the
+case-study corpus doubles as a Thesis *briefing* (curated material handed
+to forecaster agents), so its value is measured by briefed-versus-unbriefed
+contrasts rather than asserted; and every "not yet in Thesis" badge in an
+analysis is a demand signal for a new registry series.
+
 ## The flow
 
 Given bill text, the analyst produces:
