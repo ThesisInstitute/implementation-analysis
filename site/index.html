@@ -111,17 +111,19 @@ ul.items li .lab.actor{color:var(--flag)}
 
 /* the veil */
 .veiled-zone{position:relative}
-body.locked .veiled-zone .lens.locked ul.items li,
-body.locked .veiled-zone .lens.locked .metrics,
-body.locked .veiled-zone .lens.locked .conds{filter:blur(5px);pointer-events:none;user-select:none}
-body.locked .veil-note{display:flex}
+section.prov.locked .lens.locked ul.items li,
+section.prov.locked .lens.locked .metrics,
+section.prov.locked .lens.locked .conds{filter:blur(5px);pointer-events:none;user-select:none}
+section.prov.locked .veil-note{display:flex}
+.gate-foot .confirm-all{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;border-radius:7px;border:1px solid var(--confirm);color:var(--confirm);background:transparent;padding:8px 14px;cursor:pointer}
+.gate-foot .hint{font-size:.74rem;color:var(--dim)}
 .veil-note{display:none;align-items:center;gap:8px;font-size:.78rem;color:var(--flag);margin:6px 0 0}
 footer{border-top:1px solid var(--hairline);padding:26px 0 60px;color:var(--dim);font-size:.78rem}
 footer a{color:var(--muted)}
 @media(max-width:860px){.body-grid{grid-template-columns:1fr}nav.outline{position:static;display:none}}
 </style>
 </head>
-<body class="locked">
+<body>
 <header class="masthead"><div class="wrap mast-row">
   <div class="wordmark"><b>Thesis Institute</b> · implementation analysis</div>
   <div class="proto-tag">working prototype</div>
@@ -143,14 +145,15 @@ footer a{color:var(--muted)}
     <div class="gate-head">
       <h2>Step 1 · Countersign the imputed goals</h2>
       <p>These are what the drafters <i>appear</i> to be trying to achieve, phrased as staff would
-      own them. Confirm, edit, or strike each. The provision-level analysis unlocks when every
-      goal has a decision — but scroll down: the likely effects are already visible. That part
-      is never behind your signature.</p>
+      own them. Confirm, edit, or strike each — a provision's barrier and forecast analysis
+      unveils as soon as <i>its</i> goals are decided. Scroll down first if you like: the likely
+      effects are already visible. That part is never behind your signature.</p>
     </div>
     <div class="gate-list" id="goals"></div>
     <div class="gate-foot">
       <span class="tally" id="tally"></span>
-      <button class="unlock" id="unlock" disabled>Unlock full analysis</button>
+      <span class="hint">Reviewing for real? Go card by card. Just looking?</span>
+      <button class="confirm-all" id="confirmAll">Confirm all goals</button>
     </div>
   </section>
 
@@ -195,6 +198,21 @@ fetch("analysis.json").then(r=>r.json()).then(data=>{
   const decisions = store.get();
   const allGoals = [];
   data.provisions.forEach((p,pi)=>p.goals.forEach((g,gi)=>allGoals.push({id:`${pi}.${gi}`, prov:p.heading.split(":")[0], text:g})));
+  function provDecided(pi){
+    const p = data.provisions[pi];
+    return p.goals.every((_,gi)=>decisions[`${pi}.${gi}`]&&decisions[`${pi}.${gi}`].state);
+  }
+  function applyVeils(){
+    data.provisions.forEach((p,pi)=>{
+      const sec = document.getElementById(`p${pi}`);
+      if(sec) sec.classList.toggle("locked", !provDecided(pi));
+      const note = sec && sec.querySelector(".prov-progress");
+      if(note){
+        const done = p.goals.filter((_,gi)=>decisions[`${pi}.${gi}`]&&decisions[`${pi}.${gi}`].state).length;
+        note.textContent = provDecided(pi) ? "goals countersigned" : `${done} of ${p.goals.length} goals decided — countersign above to unveil`;
+      }
+    });
+  }
   function renderGoals(){
     goalsEl.innerHTML = "";
     allGoals.forEach(g=>{
@@ -218,17 +236,15 @@ fetch("analysis.json").then(r=>r.json()).then(data=>{
       goalsEl.appendChild(row);
     });
     const decided = allGoals.filter(g=>decisions[g.id]&&decisions[g.id].state).length;
-    document.getElementById("tally").textContent = `${decided} of ${allGoals.length} goals decided`;
-    const btn = document.getElementById("unlock");
-    btn.disabled = decided < allGoals.length;
-    if(!document.body.classList.contains("locked")){btn.classList.add("done");btn.textContent="Analysis unlocked";btn.disabled=true;}
+    const provsOpen = data.provisions.filter((_,pi)=>provDecided(pi)).length;
+    document.getElementById("tally").textContent =
+      `${decided} of ${allGoals.length} goals decided · ${provsOpen} of ${data.provisions.length} provisions unveiled`;
+    applyVeils();
   }
-  document.getElementById("unlock").onclick = ()=>{
-    document.body.classList.remove("locked");
-    localStorage.setItem("fb2-unlocked","1");
-    renderGoals();
+  document.getElementById("confirmAll").onclick = ()=>{
+    allGoals.forEach(g=>{const d=decisions[g.id]||{}; if(!d.state) decisions[g.id]={...d,state:"confirm",editing:false};});
+    store.set(decisions); renderGoals();
   };
-  if(localStorage.getItem("fb2-unlocked")==="1") document.body.classList.remove("locked");
 
   // ---- provisions ----
   const provEl = document.getElementById("provisions");
@@ -258,12 +274,12 @@ fetch("analysis.json").then(r=>r.json()).then(data=>{
       </div>
       <div class="lens locked">
         <div class="lens-head"><h4>Implementation barriers</h4><span class="badge veiledtag">unlocks after countersign</span></div>
-        <p class="veil-note">Countersign the goals above to unveil.</p>
+        <p class="veil-note prov-progress"></p>
         <ul class="items">${br}</ul>
       </div>
       <div class="lens locked">
         <div class="lens-head"><h4>Forecastable outcomes</h4><span class="badge veiledtag">unlocks after countersign</span></div>
-        <p class="veil-note">Countersign the goals above to unveil.</p>
+        <p class="veil-note">Countersign this provision's goals to unveil.</p>
         <div class="metrics">${mt}</div>
         ${cd?`<div class="conds">${cd}</div>`:""}
       </div>`;
