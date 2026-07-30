@@ -5,117 +5,101 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Implementation analysis — Farm Bill 2.0 · Thesis Institute</title>
 <meta name="description" content="A working prototype: goals you confirm, effects you're told regardless, and forecastable outcomes — run on the official Farm Bill 2.0 discussion draft.">
+<meta name="theme-color" content="#F7FAFC">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28' fill='none'%3E%3Crect width='28' height='28' rx='6' fill='%230F1A24'/%3E%3Ccircle cx='21.5' cy='14' r='5.5' fill='%23A94E80' opacity='0.12'/%3E%3Cline x1='2' y1='4.5' x2='17' y2='12' stroke='%239FB6C6' stroke-width='1.2' stroke-linecap='round' opacity='0.55'/%3E%3Cline x1='2' y1='23.5' x2='17' y2='16' stroke='%239FB6C6' stroke-width='1.5' stroke-linecap='round' opacity='0.65'/%3E%3Ccircle cx='21.5' cy='14' r='3.2' fill='%23A94E80'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ThesisInstitute/thesis-design@v1.3.1/tokens.css">
 <style>
-:root{
-  --paper:#FCFBF7; --ink:#201F1B; --muted:#6A675E; --dim:#98948A;
-  --hairline:#E5E1D6; --panel:#FFFFFF;
-  --accent:#8C2F2F; --accent-soft:#F6ECEC;
-  --confirm:#2E6B4F; --confirm-soft:#EAF2EE;
-  --flag:#9A6B1F; --flag-soft:#F7F0E2;
-  --veil:#FCFBF7E6;
-  --serif: "Charter","Iowan Old Style",Georgia,"Times New Roman",serif;
-  --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  --mono: ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-}
-@media (prefers-color-scheme: dark){
-  :root{--paper:#191813; --ink:#EDEAE0; --muted:#A5A196; --dim:#7A776D;
-        --hairline:#33312A; --panel:#201F19; --accent:#C96A6A; --accent-soft:#3A2626;
-        --confirm:#6FB294; --confirm-soft:#20312A; --flag:#C99A4B; --flag-soft:#33301F;
-        --veil:#191813E6;}
-}
+/* All colors and fonts come from the exported Thesis tokens (tokens.css above):
+ * horizon = confirmed/registry-reachable states, rose accent = told-regardless + registry gaps. */
 *{box-sizing:border-box;margin:0}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto} *{transition:none!important;animation:none!important}}
-body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+body{background:var(--canvas);color:var(--text-primary);font-family:var(--font-body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:inherit}
 .wrap{max-width:1160px;margin:0 auto;padding:0 28px}
-.eyebrow{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.eyebrow{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-tertiary)}
 
-header.masthead{border-bottom:1px solid var(--hairline);padding:26px 0 22px}
+header.masthead{border-bottom:1px solid var(--border-soft);padding:26px 0 22px}
 .mast-row{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap}
-.wordmark{font-family:var(--serif);font-size:1.02rem;letter-spacing:.01em}
+.wordmark{font-family:var(--font-display);font-size:1.06rem;letter-spacing:-.01em}
 .wordmark b{font-weight:600}
-.proto-tag{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--hairline);border-radius:99px;padding:3px 9px;color:var(--muted)}
+.proto-tag{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border-strong);background:var(--paper);border-radius:99px;padding:3px 9px;color:var(--text-secondary)}
 
-.hero{padding:44px 0 8px}
-.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.16;letter-spacing:-.015em;max-width:21em}
-.hero h1 em{font-style:italic}
-.billcard{margin-top:26px;border:1px solid var(--hairline);background:var(--panel);border-radius:10px;padding:18px 20px;display:flex;flex-wrap:wrap;gap:6px 28px;align-items:baseline}
-.billcard .name{font-family:var(--serif);font-size:1.08rem;font-weight:600}
-.billcard .meta{color:var(--muted);font-size:.82rem}
+.hero{padding:44px 0 8px;background:radial-gradient(900px 380px at 28% -12%,color-mix(in srgb,var(--horizon-300) 20%,transparent),transparent 62%)}
+.hero .eyebrow{color:var(--accent)}
+.hero h1{font-family:var(--font-display);font-weight:400;font-size:clamp(1.8rem,3.8vw,2.7rem);line-height:1.14;letter-spacing:-.02em;max-width:21em;margin-top:14px}
+.hero h1 em{font-family:var(--font-editorial);font-style:italic}
+.billcard{margin-top:26px;border:1px solid var(--border-soft);background:var(--paper);border-radius:10px;padding:18px 20px;display:flex;flex-wrap:wrap;gap:6px 28px;align-items:baseline}
+.billcard .name{font-family:var(--font-display);font-size:1.1rem;font-weight:500}
+.billcard .meta{color:var(--text-secondary);font-size:.82rem}
 .billcard a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
-.billcard a:hover{border-bottom-color:var(--accent)}
+.billcard a:hover{color:var(--accent-hover);border-bottom-color:var(--accent-hover)}
 
-.honesty{margin:18px 0 0;padding:12px 16px;border-left:3px solid var(--flag);background:var(--flag-soft);border-radius:0 8px 8px 0;font-size:.82rem;color:var(--muted);max-width:62em}
-.honesty b{color:var(--ink)}
+.honesty{margin:18px 0 0;padding:12px 16px;border-left:3px solid var(--horizon-300);background:var(--horizon-50);border-radius:0 8px 8px 0;font-size:.82rem;color:var(--text-secondary);max-width:62em}
+.honesty b{color:var(--text-primary)}
 
-/* ---- the confirm gate ---- */
-.gate{margin:40px 0 8px;border:1px solid var(--hairline);border-radius:12px;background:var(--panel);overflow:hidden}
+/* ---- countersign panel ---- */
+.gate{margin:40px 0 8px;border:1px solid var(--border-soft);border-radius:12px;background:var(--paper);overflow:hidden}
 .gate-head{padding:18px 22px 6px}
-.gate-head h2{font-family:var(--serif);font-weight:600;font-size:1.15rem}
-.gate-head p{color:var(--muted);font-size:.86rem;max-width:56em;margin-top:4px}
+.gate-head h2{font-family:var(--font-display);font-weight:500;font-size:1.2rem;letter-spacing:-.01em}
+.gate-head p{color:var(--text-secondary);font-size:.86rem;max-width:56em;margin-top:4px}
 .gate-list{padding:10px 22px 18px;display:grid;gap:10px}
-.goal{border:1px solid var(--hairline);border-radius:9px;padding:12px 14px;display:flex;gap:14px;align-items:flex-start;background:var(--paper)}
-.goal.decided-confirm{border-color:var(--confirm);background:var(--confirm-soft)}
+.goal{border:1px solid var(--border-soft);border-radius:9px;padding:12px 14px;display:flex;gap:14px;align-items:flex-start;background:var(--canvas)}
+.goal.decided-confirm{border-color:var(--horizon-300);background:var(--horizon-50)}
 .goal.decided-reject{opacity:.55}
-.goal .g-prov{font-family:var(--mono);font-size:.6rem;color:var(--dim);white-space:nowrap;padding-top:4px;letter-spacing:.06em}
+.goal .g-prov{font-family:var(--font-mono);font-size:.6rem;color:var(--text-tertiary);white-space:nowrap;padding-top:4px;letter-spacing:.06em}
 .goal .g-text{flex:1;font-size:.9rem}
-.goal .g-text textarea{width:100%;font:inherit;color:inherit;background:var(--panel);border:1px solid var(--hairline);border-radius:6px;padding:6px 8px;resize:vertical;min-height:44px}
+.goal .g-text textarea{width:100%;font:inherit;color:inherit;background:var(--paper);border:1px solid var(--border-soft);border-radius:6px;padding:6px 8px;resize:vertical;min-height:44px}
 .g-actions{display:flex;gap:6px;flex-shrink:0}
-.g-actions button{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--hairline);background:var(--panel);color:var(--muted);border-radius:6px;padding:5px 9px;cursor:pointer}
-.g-actions button:hover{border-color:var(--muted)}
+.g-actions button{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--border-soft);background:var(--paper);color:var(--text-secondary);border-radius:6px;padding:5px 9px;cursor:pointer}
+.g-actions button:hover{border-color:var(--border-strong);color:var(--text-primary)}
 .g-actions button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.g-actions .b-confirm.on{background:var(--confirm);border-color:var(--confirm);color:#fff}
-.g-actions .b-reject.on{background:var(--muted);border-color:var(--muted);color:var(--paper)}
-.gate-foot{border-top:1px solid var(--hairline);padding:13px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
-.gate-foot .tally{font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;color:var(--muted)}
-.gate-foot .unlock{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;border-radius:7px;border:1px solid var(--accent);color:var(--accent);background:transparent;padding:8px 14px;cursor:pointer}
-.gate-foot .unlock:disabled{opacity:.4;cursor:not-allowed}
-.gate-foot .unlock.done{background:var(--confirm);border-color:var(--confirm);color:#fff}
+.g-actions .b-confirm.on{background:var(--horizon-700);border-color:var(--horizon-700);color:var(--paper)}
+.g-actions .b-reject.on{background:var(--text-secondary);border-color:var(--text-secondary);color:var(--canvas)}
+.gate-foot{border-top:1px solid var(--border-soft);padding:13px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.gate-foot .tally{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.08em;color:var(--text-secondary)}
 
-.regardless-note{margin:26px 0 0;font-size:.84rem;color:var(--muted);max-width:60em}
+.regardless-note{margin:26px 0 0;font-size:.84rem;color:var(--text-secondary);max-width:60em}
 .regardless-note b{color:var(--accent)}
 
 /* ---- layout ---- */
 .body-grid{display:grid;grid-template-columns:230px minmax(0,1fr);gap:40px;padding:34px 0 90px}
 nav.outline{position:sticky;top:18px;align-self:start;font-size:.8rem}
-nav.outline .t{font-family:var(--serif);font-weight:600;margin:14px 0 6px}
-nav.outline a{display:block;color:var(--muted);text-decoration:none;padding:3px 0 3px 10px;border-left:2px solid transparent;line-height:1.3}
-nav.outline a:hover{color:var(--ink)}
+nav.outline .t{font-family:var(--font-display);font-weight:600;margin:14px 0 6px}
+nav.outline a{display:block;color:var(--text-secondary);text-decoration:none;padding:3px 0 3px 10px;border-left:2px solid transparent;line-height:1.3}
+nav.outline a:hover{color:var(--text-primary)}
 nav.outline a.active{color:var(--accent);border-left-color:var(--accent)}
 
-.prov{border-top:1px solid var(--hairline);padding:30px 0 8px;scroll-margin-top:12px}
-.prov h3{font-family:var(--serif);font-weight:600;font-size:1.2rem;line-height:1.3;max-width:34em}
-.prov .quote{margin:14px 0 0;padding:10px 16px;border-left:3px solid var(--hairline);font-family:var(--serif);font-style:italic;color:var(--muted);font-size:.94rem;max-width:52em}
+.prov{border-top:1px solid var(--border-soft);padding:30px 0 8px;scroll-margin-top:12px}
+.prov h3{font-family:var(--font-display);font-weight:500;font-size:1.25rem;line-height:1.3;letter-spacing:-.01em;max-width:34em}
+.prov .quote{margin:14px 0 0;padding:10px 16px;border-left:3px solid var(--border-strong);font-family:var(--font-editorial);font-style:italic;color:var(--text-secondary);font-size:1rem;max-width:52em}
 .lens{margin-top:22px}
 .lens-head{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
-.lens-head h4{font-family:var(--serif);font-weight:600;font-size:.98rem}
-.badge{font-family:var(--mono);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;border-radius:99px;padding:2px 8px}
-.badge.regardless{background:var(--accent-soft);color:var(--accent)}
-.badge.confirmable{background:var(--confirm-soft);color:var(--confirm)}
-.badge.veiledtag{background:var(--flag-soft);color:var(--flag)}
+.lens-head h4{font-family:var(--font-display);font-weight:500;font-size:1.02rem}
+.badge{font-family:var(--font-mono);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;border-radius:99px;padding:2px 8px}
+.badge.regardless{background:var(--accent-subtle);color:var(--accent)}
+.badge.confirmable{background:var(--horizon-100);color:var(--horizon-700)}
 ul.items{list-style:none;display:grid;gap:8px}
-ul.items li{border:1px solid var(--hairline);border-radius:8px;background:var(--panel);padding:10px 13px;font-size:.87rem;max-width:62em}
-ul.items li .lab{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:3px}
-ul.items li .lab.actor{color:var(--flag)}
+ul.items li{border:1px solid var(--border-soft);border-radius:8px;background:var(--paper);padding:10px 13px;font-size:.87rem;max-width:62em}
+ul.items li .lab{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:3px}
+ul.items li .lab.actor{color:var(--horizon-600)}
 .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
-.metric{border:1px solid var(--hairline);border-radius:8px;background:var(--panel);padding:11px 13px;font-size:.82rem;display:flex;flex-direction:column;gap:6px}
-.metric .k{font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.reg{font-family:var(--mono);font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:2px 8px;align-self:flex-start}
-.reg.reachable{background:var(--confirm-soft);color:var(--confirm)}
-.reg.not-yet{background:var(--flag-soft);color:var(--flag)}
-.reg.no-series{background:var(--accent-soft);color:var(--accent)}
-.reg.unknown{background:var(--paper);color:var(--dim);border:1px solid var(--hairline)}
+.metric{border:1px solid var(--border-soft);border-radius:8px;background:var(--paper);padding:11px 13px;font-size:.82rem;display:flex;flex-direction:column;gap:6px}
+.metric .k{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary)}
+.reg{font-family:var(--font-mono);font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:2px 8px;align-self:flex-start}
+.reg.reachable{background:var(--horizon-100);color:var(--horizon-700)}
+.reg.not-yet{background:var(--section);color:var(--text-secondary);border:1px solid var(--border-soft)}
+.reg.no-series{background:var(--accent-subtle);color:var(--accent)}
+.reg.unknown{background:var(--canvas);color:var(--text-tertiary);border:1px solid var(--border-soft)}
 .conds{display:grid;gap:6px;margin-top:8px}
-.cond{font-family:var(--mono);font-size:.72rem;line-height:1.5;color:var(--muted);border-left:2px solid var(--accent);padding:2px 0 2px 10px;max-width:60em}
+.cond{font-family:var(--font-mono);font-size:.72rem;line-height:1.5;color:var(--text-secondary);border-left:2px solid var(--accent);padding:2px 0 2px 10px;max-width:60em}
 
-/* the veil */
-.veiled-zone{position:relative}
-.gate-foot .confirm-all{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;border-radius:7px;border:1px solid var(--confirm);color:var(--confirm);background:transparent;padding:8px 14px;cursor:pointer}
-.gate-foot .hint{font-size:.74rem;color:var(--dim)}
-.veil-note{display:none;align-items:center;gap:8px;font-size:.78rem;color:var(--flag);margin:6px 0 0}
-footer{border-top:1px solid var(--hairline);padding:26px 0 60px;color:var(--dim);font-size:.78rem}
-footer a{color:var(--muted)}
+footer{border-top:1px solid var(--border-soft);padding:26px 0 60px;color:var(--text-tertiary);font-size:.78rem}
+footer a{color:var(--text-secondary)}
+footer a:hover{color:var(--accent)}
 @media(max-width:860px){.body-grid{grid-template-columns:1fr}nav.outline{position:static;display:none}}
 </style>
 </head>
@@ -175,7 +159,7 @@ footer a{color:var(--muted)}
 
   <div class="body-grid">
     <nav class="outline" id="outline" aria-label="Bill outline"></nav>
-    <div id="provisions" class="veiled-zone"></div>
+    <div id="provisions"></div>
   </div>
 </main>
 
@@ -190,7 +174,7 @@ const REG_LABEL = {reachable:"Thesis-reachable", "not-yet":"not yet in Thesis", 
 const esc = t => t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const md = t => esc(t)
   .replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")
-  .replace(/`([^`]+)`/g,"<code style=\"font-family:var(--mono);font-size:.92em\">$1</code>")
+  .replace(/`([^`]+)`/g,"<code style=\"font-family:var(--font-mono);font-size:.92em\">$1</code>")
   .replace(/\*(.+?)\*/g,"<i>$1</i>");
 const store = {
   get(){ try{return JSON.parse(localStorage.getItem("fb2-goals")||"{}")}catch(e){return{}} },
