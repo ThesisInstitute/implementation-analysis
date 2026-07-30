@@ -14,7 +14,7 @@ be your goals; confirm or amend before full analysis" — never as an
 assertion.
 
 **Likely effects [TOLD REGARDLESS].** Downstream consequences by
-mechanism, including at least one the drafters may not want to hear.
+mechanism, including at least one that runs against the drafters' goals.
 These are surfaced no matter what the confirmed goals are.
 
 **Implementation barriers.** The lobbyist-grade critique, made for the

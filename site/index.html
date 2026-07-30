@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Implementation analysis — Farm Bill 2.0 · Thesis Institute</title>
-<meta name="description" content="A working prototype: goals you confirm, effects you're told regardless, and forecastable outcomes — run on the official Farm Bill 2.0 discussion draft.">
+<meta name="description" content="A working prototype: imputed goals you can confirm or correct, likely effects shown regardless, and forecastable outcomes — run on the official Farm Bill 2.0 discussion draft.">
 <meta name="theme-color" content="#F7FAFC">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28' fill='none'%3E%3Crect width='28' height='28' rx='6' fill='%230F1A24'/%3E%3Ccircle cx='21.5' cy='14' r='5.5' fill='%23A94E80' opacity='0.12'/%3E%3Cline x1='2' y1='4.5' x2='17' y2='12' stroke='%239FB6C6' stroke-width='1.2' stroke-linecap='round' opacity='0.55'/%3E%3Cline x1='2' y1='23.5' x2='17' y2='16' stroke='%239FB6C6' stroke-width='1.5' stroke-linecap='round' opacity='0.65'/%3E%3Ccircle cx='21.5' cy='14' r='3.2' fill='%23A94E80'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ThesisInstitute/thesis-design@v1.3.1/tokens.css">
 <style>
 /* All colors and fonts come from the exported Thesis tokens (tokens.css above):
- * horizon = confirmed/registry-reachable states, rose accent = told-regardless + registry gaps. */
+ * horizon = confirmed/registry-reachable states, rose accent = shown-regardless + registry gaps. */
 *{box-sizing:border-box;margin:0}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto} *{transition:none!important;animation:none!important}}
@@ -112,7 +112,7 @@ footer a:hover{color:var(--accent)}
 <main class="wrap">
   <section class="hero">
     <div class="eyebrow">Read a bill the way an implementation analyst would</div>
-    <h1>It imputes your goals and asks you to countersign them. The likely effects, <em>you get told regardless.</em></h1>
+    <h1>It imputes the drafters' goals for you to confirm or correct, and surfaces the likely effects <em>whether or not they serve them.</em></h1>
     <div class="billcard" id="billcard"></div>
     <p class="honesty"><b>What this is.</b> A prototype of the analysis flow, run on the official
     discussion-draft text (linked above) on <span id="adate"></span> and spot-verified against the source.
@@ -136,9 +136,9 @@ footer a:hover{color:var(--accent)}
     </div>
   </section>
 
-  <p class="regardless-note"><b>Told regardless:</b> effects are surfaced whether or not they serve
-  the confirmed goals — including the mechanisms a drafter may not want to hear. Confirming goals
-  changes what the tool asks next, never what it shows you.</p>
+  <p class="regardless-note"><b>Shown regardless:</b> likely effects appear whether or not they
+  serve the confirmed goals, adverse mechanisms included. Confirming goals steers what the tool
+  asks next; the full analysis stays open either way.</p>
 
   <section class="gate" style="margin-top:26px">
     <div class="gate-head" style="padding-bottom:18px">
@@ -243,7 +243,7 @@ fetch("analysis.json").then(r=>r.json()).then(data=>{
       <h3>${p.heading}</h3>
       ${p.quote?`<blockquote class="quote">“${md(p.quote)}”</blockquote>`:""}
       <div class="lens">
-        <div class="lens-head"><h4>Likely effects</h4><span class="badge regardless">told regardless</span></div>
+        <div class="lens-head"><h4>Likely effects</h4><span class="badge regardless">shown regardless</span></div>
         <ul class="items">${fx}</ul>
       </div>
       <div class="lens">
