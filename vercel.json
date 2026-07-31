@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://app.thesisinstitute.org/bills/farm-bill-2-0",
+      "permanent": false
+    }
+  ]
+}
