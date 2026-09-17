@@ -62,3 +62,7 @@ compounds.
 Prototype (July 2026). First live test: the Farm Bill 2.0 discussion draft
 (Agricultural Act of 2026), Titles II and VI — see `demos/` when it lands.
 Apache-2.0.
+
+## License
+
+Code in this repository is released under the [MIT License](LICENSE). Original text and figures are released under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) with attribution to Thesis Institute. Third-party data and materials keep their own terms.
